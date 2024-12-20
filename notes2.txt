@@ -1,0 +1,10 @@
+How am I ganna do this? 
+
+General things to create
+  1.) Lexer - covert string to tokens
+  2.) Parser - covert tokens into an abstract syntax tree (AST)
+  3.) Semantic validation - checking for correctt syntax e.g. unreachable code
+  4.) Code generater - AST is transformed lower-level code "bytecode" 
+                        with jumps, register allocation etc...
+  5.) Optimization - bytecode is scanned for inefficiencies that are eliminated
+  6.) Use JVM to test bytecode

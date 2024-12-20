@@ -1,0 +1,52 @@
+
+What is a compiler? 
+  - program that breaks down programming language code down to machine code
+  - reads a file, analyzes the code, and translates it into a target plarform
+    suitable formate
+  
+What is a java compiler?
+  - generate bytecode taht can be executed by the Java Virtual Machine
+  - involves 1.) writing code, 2.) invocing compiler, 3.) generating bytecode
+    4.) verifying bytecode
+  - this process makes sure source code is transformed to platform-independent
+    format (bytecode), which is then executed by JVM.
+
+Types of compilation
+
+  1.) Ahead-of-TIme (AOT) compilation 
+    - This is when the compiler translated Java source code directly to native
+      machine code
+  2.) Just in TIme (JIT) compilation
+    - occurs at runtime, JVM compiles bytecode into native code as app runs
+
+  Synchronous Compilation: Simplifies flow but may introduce execution latency due to real-time compilation.
+  Asynchronous Compilation: Enhances performance by compiling in the background, reducing impact on execution.
+
+Steps of compilation
+  1.) Generate bytecode
+    - compiler translates source .java code into bytecode that is stored 
+      int a platform-independent way in a .class file
+    Steps
+      1.) Parsing - compiler reads source code and parses it into a datastructure
+          called a Abstract Syntax Tree (AST), representing the hierarchical structure
+          of the code
+      2.) Semantic Analysis - compiler checks for semantical errors, such as undefined vars,
+          and logical errors
+      3.) Optimization - depending ont the compiler this step is ment to improve the
+          efficiency of the bytecode
+      4.) Bytecode Generation - AST is translated to bytecode, which is lower-level, and 
+          platform-independent set of instructions for the JVM
+  
+  2.) Verifying Bytecode
+    - Bytecode Verifier - before executing, the JVM verifies bytecode to ensure code 
+      follows Java's security constraints / this process involves checking for 
+      runtime errors (type safety, stack overflow, and proper use of objects).
+  
+  3.) Esecution
+    - Java Virtual Machine (JVM) - interprest using JIT compilation for the bytecode
+      into machine specific machine code to the underlying hardware
+      Tools
+      Class loader - load classes / dynamic loading ensure necessary classes are
+                     loaded preventing overuse of memory
+      Execution engine - interprets bytecode using JIT compilation to covert bytecode
+                         into native instructions
