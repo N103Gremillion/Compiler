@@ -1,0 +1,8 @@
+How do lexers work?
+  - converts a input stream of chars into a ouput stream of tokens
+  Input         →  Output 
+  (characters)     (tokens)
+
+  - Scan the series of characters and group into chuncks "tokens" 
+  tokens - meaningful "words" and "punctuation" that mak up language's grammer
+  

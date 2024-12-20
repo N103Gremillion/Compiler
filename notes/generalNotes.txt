@@ -1,4 +1,3 @@
-
 What is a compiler? 
   - program that breaks down programming language code down to machine code
   - reads a file, analyzes the code, and translates it into a target plarform
