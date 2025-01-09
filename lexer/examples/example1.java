@@ -1,9 +1,7 @@
 
-class example1 {
-    int var1 = 10 * -20;
+public class example {
+    public static void main(String[] args) {
+        
+    }
 }
-
-
-
-
 

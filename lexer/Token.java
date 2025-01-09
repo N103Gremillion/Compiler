@@ -12,7 +12,7 @@ public class Token {
 
     // static functions
     public static void debug(Token token) {
-        if (token.typeIsIn(new Type[] {Type.IDENTIFIER, Type.NULL_LITERAL, Type.INTEGER_LITERAL, Type.FLOAT_LITERAL, Type.STRING_LITERAL})) {
+        if (token.typeIsIn(new Type[] {Type.IDENTIFIER, Type.INTEGER_LITERAL, Type.FLOAT_LITERAL, Type.STRING_LITERAL})) {
             System.out.println(String.format("%s (%s)\n", tokenTypeToString(token.type), token.value));
         }
         else {
@@ -28,9 +28,14 @@ public class Token {
         }
         return false;    
     }
-
+    
     public static String tokenTypeToString(Type type) {
         return switch (type) {
+            case IDENTIFIER -> "identifier";
+            case INTEGER_LITERAL -> "int_literal";
+            case FLOAT_LITERAL -> "float_literal";
+            case STRING_LITERAL -> "string_literal";
+            case NULL_LITERAL -> "null";
             case OPEN_BRACKET -> "open_bracket";
             case CLOSE_BRACKET -> "close_bracket";
             case OPEN_CURLY -> "open_curly";

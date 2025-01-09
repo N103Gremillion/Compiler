@@ -2,8 +2,6 @@ package lexer;
 
 public enum Type {
 
-    IDENTIFIER,
-
     NULL_LITERAL,
     INTEGER_LITERAL,
     FLOAT_LITERAL,
@@ -100,5 +98,7 @@ public enum Type {
     LONG,
     SHORT,
 
-    LAMBDA_OPERATOR
+    LAMBDA_OPERATOR,
+
+    IDENTIFIER,
 }
