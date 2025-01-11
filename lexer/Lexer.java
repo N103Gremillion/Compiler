@@ -7,106 +7,108 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Lexer {
+public class Lexer{
 
     List<Pattern> patterns;
     List<Type> types;
     List<Token> tokens;
     String fileSource;
+    List<Character> file;
+    int pos;
     int line;
 
     public Lexer (){
         this.line = 0;
+        this.pos = 0;
         this.tokens = new ArrayList<>();
         this.patterns = new ArrayList<>();
         this.types = new ArrayList<>();
+        this.file = new ArrayList<>();
         addPatterns(this.patterns);
     }
 
     @Override
-    public String toString() {
-
+    public String toString(){
         String result = "";
-
         for (Token token : tokens) {
             String tokType = Token.tokenTypeToString(token.type);
             String tokVal = token.value;
             result += String.format("%s | %s\n", tokVal, tokType);
         }
-
         return result;
     }
 
-    public void setFile(String fileString) {
-        this.fileSource = fileString;
+    public String getFileString() {
+        char cur;
+        String result = "";
+        int i = 0;
+        while (i < file.size()){
+            cur = (char) file.get(i);
+            result += cur;
+            i++;
+        }
+        return result;
     }
 
-    public void tokenize() {
+    public void inputFile(String fileString) {
+        this.fileSource = fileString;
         try (FileReader r = new FileReader(this.fileSource)) {
             int i;
-            StringBuilder text = new StringBuilder();
-            boolean inWord = false; 
-
             while ((i = r.read()) != -1) {
                 char cur = (char) i;
-
-                if (Character.isWhitespace(cur)) {
-                    if (text.length() > 0) {
-                        processText(text.toString());
-                        text.setLength(0);
-                    }
-                } 
-                else if (isSeparator(cur)) {
-                    if (text.length() > 0) {
-                        processText(text.toString());
-                        text.setLength(0);
-                    }
-                    text.append(cur);
-                    processText(text.toString());
-                    text.setLength(0);
-                }
-                else {
-                text.append(cur);
+                if (cur != ' ' && cur != '\t' && cur != '\n') {
+                    file.add(cur);
                 }
             }
-
-            if (text.length() > 0) {
-                processText(text.toString());
-            }
-
-        } catch (IOException e) {
+        } 
+        catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void processText(String tokenText) {
-        boolean matched = false;
 
-        for (int j = 0; j < patterns.size(); j++) {
+    public char getNext(){
+        pos++;
+        if (pos >= file.size()){
+            return '\u0000';
+        }
+        char cur = file.get(pos);
+        while (cur != ' ' && cur != '\t' && cur != '\n'){
+            if (cur == '\n'){
+                line++;
+            }
+            pos++;
+            cur = file.get(pos);
+        }
+        return cur;
+    }
+
+    private void processText(String tokenText){
+        boolean matched = false;
+        for (int j = 0; j < patterns.size(); j++){
             Pattern pattern = patterns.get(j);
             Matcher matcher = pattern.matcher(tokenText);
 
-            if (matcher.matches()) {
+            if (matcher.matches()){
                 Token token = new Token(types.get(j), tokenText);
                 tokens.add(token);
                 matched = true;
                 break;
             }
         }
-
-        if (!matched) {
+        if (!matched){
             System.out.println("Invalid token: " + tokenText);
         }
     }
 
-    private boolean isSeparator(char c) {
+    private boolean isSeparator(char c){
         if (c == ',' || c == ';' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']'){
             return true;
         }
         return false;
     }
 
-    public void addPatterns(List<Pattern> patterns) {
+    public void addPatterns(List<Pattern> patterns){
          // 1. Null Literal
         patterns.add(Pattern.compile("null"));  
         types.add(Type.NULL_LITERAL);
