@@ -1,8 +1,6 @@
-
-
 public class main{
     public static void main(String[] args){
-        Compiler comp = new Compiler();
+        JavaCompiler comp = new JavaCompiler();
         comp.compile("./lexer/examples/example1.java");        
     }
 }

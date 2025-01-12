@@ -56,9 +56,7 @@ public class Lexer{
             int i;
             while ((i = r.read()) != -1) {
                 char cur = (char) i;
-                if (cur != ' ' && cur != '\t' && cur != '\n') {
-                    file.add(cur);
-                }
+                file.add(cur);
             }
         } 
         catch (IOException e) {
@@ -66,21 +64,47 @@ public class Lexer{
         }
     }
 
-
-    public char getNext(){
+    private void incrementPos() {
         pos++;
+    }
+
+    public char getNextChar() {
         if (pos >= file.size()){
             return '\u0000';
         }
-        char cur = file.get(pos);
-        while (cur != ' ' && cur != '\t' && cur != '\n'){
+        char c = file.get(pos);
+        incrementPos();
+        return c;
+    }
+
+    public String getNextValue(){
+        if (pos >= file.size()){
+            return "";
+        }
+        StringBuilder value = new StringBuilder();
+        boolean found = false;
+        boolean inWord = false;
+        while (!found){
+            char cur = getNextChar();
             if (cur == '\n'){
                 line++;
             }
-            pos++;
-            cur = file.get(pos);
+            if ((Character.isWhitespace(cur) || isSeparator(cur)) && inWord) {
+                found = true;
+            }
+            else if (isSeparator(cur) && !inWord) {
+                value.append(cur);
+                found = true;
+            }
+            else if (Character.isWhitespace(cur)) {
+                continue;
+            }
+            else {
+                inWord = true;
+                value.append(cur);
+            }
         }
-        return cur;
+        return value.toString();
     }
 
     private void processText(String tokenText){
