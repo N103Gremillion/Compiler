@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Lexer{
+public final class Lexer{
 
     List<Pattern> patterns;
     List<Type> types;
@@ -64,17 +64,18 @@ public class Lexer{
         }
     }
 
-    private void incrementPos() {
-        pos++;
+    public void testTokenizer() {
+        Token token = getNextToken();
+        while (token != null) {
+            System.out.println(token.value + " | " + Token.tokenTypeToString(token.type));
+            token = getNextToken();
+        }
     }
 
-    public char getNextChar() {
-        if (pos >= file.size()){
-            return '\u0000';
-        }
-        char c = file.get(pos);
-        incrementPos();
-        return c;
+    public Token getNextToken() {
+        String value = getNextValue();
+        Type type = getTokenType(value);
+        return new Token(type, value);
     }
 
     public String getNextValue(){
@@ -97,7 +98,6 @@ public class Lexer{
                 found = true;
             }
             else if (Character.isWhitespace(cur)) {
-                continue;
             }
             else {
                 inWord = true;
@@ -107,29 +107,39 @@ public class Lexer{
         return value.toString();
     }
 
-    private void processText(String tokenText){
+    public char getNextChar() {
+        if (pos >= file.size()){
+            return '\u0000';
+        }
+        char c = file.get(pos);
+        incrementPos();
+        return c;
+    }
+
+    private void incrementPos() {
+        pos++;
+    }
+
+    private Type getTokenType(String value){
         boolean matched = false;
+        Type type = null;
         for (int j = 0; j < patterns.size(); j++){
             Pattern pattern = patterns.get(j);
-            Matcher matcher = pattern.matcher(tokenText);
-
+            Matcher matcher = pattern.matcher(value);
             if (matcher.matches()){
-                Token token = new Token(types.get(j), tokenText);
-                tokens.add(token);
+                type = types.get(j);
                 matched = true;
                 break;
             }
         }
         if (!matched){
-            System.out.println("Invalid token: " + tokenText);
+            return null;
         }
+        return type;
     }
 
     private boolean isSeparator(char c){
-        if (c == ',' || c == ';' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']'){
-            return true;
-        }
-        return false;
+        return c == ',' || c == ';' || c == '(' || c == ')' || c == '{' || c == '}' || c == '[' || c == ']';
     }
 
     public void addPatterns(List<Pattern> patterns){

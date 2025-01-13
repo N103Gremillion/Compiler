@@ -11,10 +11,6 @@ class JavaCompiler {
     public void compile(String fileName) {
         // lex the file
         lex.inputFile(fileName);
-        String cur = lex.getNextValue();
-        while (cur != "") {
-            System.out.println(cur);
-            cur = lex.getNextValue();
-        }
+        lex.testTokenizer();  
     }
 }
