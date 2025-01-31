@@ -30,10 +30,12 @@ public final class Lexer{
     @Override
     public String toString(){
         String result = "";
+        int num = 1;
         for (Token token : tokens) {
             String tokType = Token.tokenTypeToString(token.type);
             String tokVal = token.value;
-            result += String.format("%s | %s\n", tokVal, tokType);
+            result += String.format("%d | %s | %s\n", num, tokVal, tokType);
+            num++;
         }
         return result;
     }
@@ -66,15 +68,20 @@ public final class Lexer{
 
     public void testTokenizer() {
         Token token = getNextToken();
+        int num = 1;
         while (token != null) {
-            System.out.println(token.value + " | " + Token.tokenTypeToString(token.type));
+            System.out.println(num + " | " + token.value + " | " + Token.tokenTypeToString(token.type));
             token = getNextToken();
+            num++;
         }
     }
 
     public Token getNextToken() {
         String value = getNextValue();
         Type type = getTokenType(value);
+        if (value == null || type == null) {
+            return null;
+        }
         return new Token(type, value);
     }
 
@@ -90,7 +97,10 @@ public final class Lexer{
             if (cur == '\n'){
                 line++;
             }
-            if ((Character.isWhitespace(cur) || isSeparator(cur)) && inWord) {
+            if (cur == '\u0000') {
+                return null;
+            }
+            else if ((Character.isWhitespace(cur) || isSeparator(cur)) && inWord) {
                 found = true;
             }
             else if (isSeparator(cur) && !inWord) {
@@ -121,6 +131,9 @@ public final class Lexer{
     }
 
     private Type getTokenType(String value){
+        if (value == null) {
+            return null;
+        }
         boolean matched = false;
         Type type = null;
         for (int j = 0; j < patterns.size(); j++){
@@ -145,255 +158,285 @@ public final class Lexer{
     public void addPatterns(List<Pattern> patterns){
          // 1. Null Literal
         patterns.add(Pattern.compile("null"));  
-        types.add(Type.NULL_LITERAL);
+        types.add(Type.LITERAL);
 
         // 2. Literals 
         patterns.add(Pattern.compile("\"[^\"]*\"")); 
-        types.add(Type.STRING_LITERAL);
+        types.add(Type.LITERAL);
 
         patterns.add(Pattern.compile("\\d+\\.\\d+|\\d*\\.\\d+")); 
-        types.add(Type.FLOAT_LITERAL);
+        types.add(Type.LITERAL);
 
         patterns.add(Pattern.compile("\\d+")); 
-        types.add(Type.INTEGER_LITERAL);
-
-        // 3. Parentheses, Brackets, and Curly Braces
-        patterns.add(Pattern.compile("\\(")); 
-        types.add(Type.OPEN_PAREN);
-
-        patterns.add(Pattern.compile("\\)")); 
-        types.add(Type.CLOSE_PAREN);
-
-        patterns.add(Pattern.compile("\\[")); 
-        types.add(Type.OPEN_BRACKET);
-
-        patterns.add(Pattern.compile("\\]")); 
-        types.add(Type.CLOSE_BRACKET);
-
-        patterns.add(Pattern.compile("\\{")); 
-        types.add(Type.OPEN_CURLY);
-
-        patterns.add(Pattern.compile("\\}")); 
-        types.add(Type.CLOSE_CURLY);
+        types.add(Type.LITERAL);
 
         // 4. Operators 
         patterns.add(Pattern.compile("\\+\\+")); 
-        types.add(Type.PLUS_PLUS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("--")); 
-        types.add(Type.MINUS_MINUS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\+\\=")); 
-        types.add(Type.PLUS_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("-\\=")); 
-        types.add(Type.MINUS_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("/\\=")); 
-        types.add(Type.SLASH_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\*\\=")); 
-        types.add(Type.STAR_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\+")); 
-        types.add(Type.PLUS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("-")); 
-        types.add(Type.DASH);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("/")); 
-        types.add(Type.SLASH);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\*")); 
-        types.add(Type.STAR);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("%")); 
-        types.add(Type.PERCENT);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\="));
-        types.add(Type.ASSIGNMENT);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("==")); 
-        types.add(Type.EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("!=")); 
-        types.add(Type.NOT_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("!")); 
-        types.add(Type.NOT);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("<"));
-        types.add(Type.LESS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("<=")); 
-        types.add(Type.LESS_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile(">")); 
-        types.add(Type.GREATER);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile(">=")); 
-        types.add(Type.GREATER_EQUALS);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\|\\|")); 
-        types.add(Type.OR);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("&&")); 
-        types.add(Type.AND);
-
-        // 5. Delimiters
-        patterns.add(Pattern.compile("\\;")); 
-        types.add(Type.SEMICOLON);
-
-        patterns.add(Pattern.compile("\\:")); 
-        types.add(Type.COLON);
+        types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("\\?")); 
-        types.add(Type.QUESTION);
+        types.add(Type.OPERATOR);
 
-        patterns.add(Pattern.compile("\\,")); 
-        types.add(Type.COMMA);
+        // 5. Delimiters
+        patterns.add(Pattern.compile("\\(")); 
+        types.add(Type.DELIMITER);
+
+        patterns.add(Pattern.compile("\\)")); 
+        types.add(Type.DELIMITER);
+
+        patterns.add(Pattern.compile("\\[")); 
+        types.add(Type.DELIMITER);
+
+        patterns.add(Pattern.compile("\\]")); 
+
+        patterns.add(Pattern.compile("\\{")); 
+        types.add(Type.DELIMITER);
+
+        patterns.add(Pattern.compile("\\}")); 
+        types.add(Type.DELIMITER);
+
+        patterns.add(Pattern.compile("\\;"));
+        types.add(Type.DELIMITER);  
+
+        patterns.add(Pattern.compile("\\:"));
+        types.add(Type.DELIMITER);  
+
+        patterns.add(Pattern.compile("\\,"));
+        types.add(Type.DELIMITER);  
 
         // 6. Java Keywords 
-        patterns.add(Pattern.compile("if")); 
-        types.add(Type.IF);
+        patterns.add(Pattern.compile("if"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("else")); 
-        types.add(Type.ELSE);
+        patterns.add(Pattern.compile("else"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("switch")); 
-        types.add(Type.SWITCH);
+        patterns.add(Pattern.compile("switch"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("case")); 
-        types.add(Type.CASE);
+        patterns.add(Pattern.compile("case"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("default")); 
-        types.add(Type.DEFAULT);
+        patterns.add(Pattern.compile("default"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("while")); 
-        types.add(Type.WHILE);
+        patterns.add(Pattern.compile("while"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("do")); 
-        types.add(Type.DO);
+        patterns.add(Pattern.compile("do"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("for")); 
-        types.add(Type.FOR);
+        patterns.add(Pattern.compile("for"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("break")); 
-        types.add(Type.BREAK);
+        patterns.add(Pattern.compile("break"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("continue")); 
-        types.add(Type.CONTINUE);
+        patterns.add(Pattern.compile("continue"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("return")); 
-        types.add(Type.RETURN);
+        patterns.add(Pattern.compile("return"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("try")); 
-        types.add(Type.TRY);
+        patterns.add(Pattern.compile("try"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("catch")); 
-        types.add(Type.CATCH);
+        patterns.add(Pattern.compile("catch"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("finally")); 
-        types.add(Type.FINALLY);
+        patterns.add(Pattern.compile("finally"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("throw")); 
-        types.add(Type.THROW);
+        patterns.add(Pattern.compile("throw"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("throws")); 
-        types.add(Type.THROWS);
+        patterns.add(Pattern.compile("throws"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("class")); 
-        types.add(Type.CLASS);
+        patterns.add(Pattern.compile("class"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("interface")); 
-        types.add(Type.INTERFACE);
+        patterns.add(Pattern.compile("interface"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("enum")); 
-        types.add(Type.ENUM);
+        patterns.add(Pattern.compile("enum"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("extends")); 
-        types.add(Type.EXTENDS);
+        patterns.add(Pattern.compile("extends"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("implements")); 
-        types.add(Type.IMPLEMENTS);
+        patterns.add(Pattern.compile("implements"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("new")); 
-        types.add(Type.NEW);
+        patterns.add(Pattern.compile("new"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("abstract")); 
-        types.add(Type.ABSTRACT);
+        patterns.add(Pattern.compile("abstract"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("final")); 
-        types.add(Type.FINAL);
+        patterns.add(Pattern.compile("final"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("static")); 
-        types.add(Type.STATIC);
+        patterns.add(Pattern.compile("static"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("strictfp")); 
-        types.add(Type.STRICTFP);
+        patterns.add(Pattern.compile("strictfp"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("transient")); 
-        types.add(Type.TRANSIENT);
+        patterns.add(Pattern.compile("transient"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("volatile")); 
-        types.add(Type.VOLATILE);
+        patterns.add(Pattern.compile("volatile"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("private")); 
-        types.add(Type.PRIVATE);
+        patterns.add(Pattern.compile("private"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("protected")); 
-        types.add(Type.PROTECTED);
+        patterns.add(Pattern.compile("protected"));
+        types.add(Type.KEYWORD);
 
         patterns.add(Pattern.compile("public"));
-        types.add(Type.PUBLIC);
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("import")); 
-        types.add(Type.IMPORT);
+        patterns.add(Pattern.compile("import"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("package")); 
-        types.add(Type.PACKAGE);
+        patterns.add(Pattern.compile("package"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("super")); 
-        types.add(Type.SUPER);
+        patterns.add(Pattern.compile("super"));
+        types.add(Type.KEYWORD);
 
-        patterns.add(Pattern.compile("this")); 
-        types.add(Type.THIS);
+        patterns.add(Pattern.compile("this"));
+        types.add(Type.KEYWORD);
 
         // 7. Data Types
         patterns.add(Pattern.compile("boolean"));
-        types.add(Type.BOOLEAN);
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("byte")); 
-        types.add(Type.BYTE);
+        patterns.add(Pattern.compile("byte"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("char")); 
-        types.add(Type.CHAR);
+        patterns.add(Pattern.compile("char"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("double")); 
-        types.add(Type.DOUBLE);
+        patterns.add(Pattern.compile("double"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("float")); 
-        types.add(Type.FLOAT);
+        patterns.add(Pattern.compile("float"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("int")); 
-        types.add(Type.INT);
+        patterns.add(Pattern.compile("int"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("long")); 
-        types.add(Type.LONG);
+        patterns.add(Pattern.compile("long"));
+        types.add(Type.DATATYPE);
 
-        patterns.add(Pattern.compile("short")); 
-        types.add(Type.SHORT);
+        patterns.add(Pattern.compile("short"));
+        types.add(Type.DATATYPE);
 
         // 8. Lambda Operator
         patterns.add(Pattern.compile("->")); 
-        types.add(Type.LAMBDA_OPERATOR);
+        types.add(Type.OPERATOR);
+        
+        // SPECIAL cahrs
+        patterns.add(Pattern.compile("\\\\n")); // newline escape character
+        types.add(Type.SPECIALCHARACTER);
 
-        // 9. Identifiers 
+        patterns.add(Pattern.compile("\\\\t")); // tab escape character
+        types.add(Type.SPECIALCHARACTER);
+
+        patterns.add(Pattern.compile("\\\\\"")); // double quote escape character
+        types.add(Type.SPECIALCHARACTER);
+
+        patterns.add(Pattern.compile("\\\\\\\\")); // backslash escape character
+        types.add(Type.SPECIALCHARACTER);
+
+        patterns.add(Pattern.compile("\\\\r")); // carriage return escape character
+        types.add(Type.SPECIALCHARACTER);
+
+        patterns.add(Pattern.compile("\\\\b")); // backspace escape character
+        types.add(Type.SPECIALCHARACTER);
+
+        patterns.add(Pattern.compile("\\\\f")); // form feed escape character
+        types.add(Type.SPECIALCHARACTER);
+        
+        // comments
+        // Single-line comment
+        patterns.add(Pattern.compile("//.*"));
+        types.add(Type.COMMENT);
+
+        // Multi-line comment
+        patterns.add(Pattern.compile("/\\*.*\\*/"));
+        types.add(Type.COMMENT);
+
+        // Multi-line comment (with newlines in between)
+        patterns.add(Pattern.compile("/\\*([\\s\\S]*?)\\*/"));
+        types.add(Type.COMMENT);
+
         patterns.add(Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*")); 
         types.add(Type.IDENTIFIER);
 
-        
-         
     }
     
 }
