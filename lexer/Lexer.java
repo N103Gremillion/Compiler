@@ -100,8 +100,12 @@ public final class Lexer{
             if (cur == '\u0000') {
                 return null;
             }
-            else if ((Character.isWhitespace(cur) || isSeparator(cur)) && inWord) {
+            else if (Character.isWhitespace(cur) && inWord) {
                 found = true;
+            }
+            else if (isSeparator(cur) && inWord) {
+                found = true;
+                decrementPos();
             }
             else if (isSeparator(cur) && !inWord) {
                 value.append(cur);
@@ -128,6 +132,10 @@ public final class Lexer{
 
     private void incrementPos() {
         pos++;
+    }
+    
+    private void decrementPos() {
+        pos--;
     }
 
     private Type getTokenType(String value){
@@ -248,6 +256,7 @@ public final class Lexer{
         types.add(Type.DELIMITER);
 
         patterns.add(Pattern.compile("\\]")); 
+        types.add(Type.DELIMITER);
 
         patterns.add(Pattern.compile("\\{")); 
         types.add(Type.DELIMITER);
@@ -265,6 +274,9 @@ public final class Lexer{
         types.add(Type.DELIMITER);  
 
         // 6. Java Keywords 
+        patterns.add(Pattern.compile("void"));
+        types.add(Type.KEYWORD);
+
         patterns.add(Pattern.compile("if"));
         types.add(Type.KEYWORD);
 
@@ -406,21 +418,6 @@ public final class Lexer{
         patterns.add(Pattern.compile("\\\\t")); // tab escape character
         types.add(Type.SPECIALCHARACTER);
 
-        patterns.add(Pattern.compile("\\\\\"")); // double quote escape character
-        types.add(Type.SPECIALCHARACTER);
-
-        patterns.add(Pattern.compile("\\\\\\\\")); // backslash escape character
-        types.add(Type.SPECIALCHARACTER);
-
-        patterns.add(Pattern.compile("\\\\r")); // carriage return escape character
-        types.add(Type.SPECIALCHARACTER);
-
-        patterns.add(Pattern.compile("\\\\b")); // backspace escape character
-        types.add(Type.SPECIALCHARACTER);
-
-        patterns.add(Pattern.compile("\\\\f")); // form feed escape character
-        types.add(Type.SPECIALCHARACTER);
-        
         // comments
         // Single-line comment
         patterns.add(Pattern.compile("//.*"));
