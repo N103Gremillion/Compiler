@@ -66,6 +66,14 @@ public final class Lexer{
         }
     }
 
+    public void testValueGetter() {
+        String cur = getNextValue();
+        while (cur != null) {
+            System.out.print(cur);
+            cur = getNextValue();
+        }
+    }
+
     public void testTokenizer() {
         Token token = getNextToken();
         int num = 1;
@@ -431,9 +439,8 @@ public final class Lexer{
         patterns.add(Pattern.compile("/\\*([\\s\\S]*?)\\*/"));
         types.add(Type.COMMENT);
 
-        patterns.add(Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*")); 
+        patterns.add(Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*(\\.\\*)?"));
         types.add(Type.IDENTIFIER);
-
     }
     
 }
