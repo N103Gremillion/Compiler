@@ -108,7 +108,25 @@ public final class Lexer{
             if (cur == '\u0000') {
                 return null;
             }
-            else if (Character.isWhitespace(cur) && inWord) {
+
+            // fishinsh string litteral
+            if (cur == '"') {
+                return getStringLiteral();
+            }
+
+            // handle single line comments
+            if (cur == '/' && peekNextChar() == '/') {
+                skipSingleLineComment();
+                continue;
+            }
+
+            // **Handle Multi-Line Comments (`/* ... */`)
+            if (cur == '/' && peekNextChar() == '*') { 
+                skipMultiLineComment();
+                continue;
+            }
+
+            if (Character.isWhitespace(cur) && inWord) {
                 found = true;
             }
             else if (isSeparator(cur) && inWord) {
@@ -136,6 +154,64 @@ public final class Lexer{
         char c = file.get(pos);
         incrementPos();
         return c;
+    }
+
+    private String getStringLiteral() {
+        StringBuilder literal = new StringBuilder();
+        literal.append('"');
+
+        while (pos < file.size()) {
+            char cur = getNextChar();
+            
+            if (cur == '\\' && peekNextChar() == '"') {
+                literal.append(cur);  
+                cur = getNextChar();  
+            }
+            
+            literal.append(cur);
+            
+            if (cur == '"') {
+                break;
+            }
+
+            if (cur == '\u0000') {
+                System.err.println("Error: unterminated string");
+                return literal.toString();
+            }
+        }
+
+        return literal.toString();
+    }
+
+    private void skipSingleLineComment() {
+        while (pos < file.size()) {
+            char cur = getNextChar();
+            if (cur == '\n') {
+                line++;
+                break; // Stop at newline
+            }
+        }
+    }
+
+    private void skipMultiLineComment() {
+        getNextChar(); 
+        while (pos < file.size()) {
+            char cur = getNextChar();
+            if (cur == '*' && peekNextChar() == '/') {
+                getNextChar(); 
+                break; 
+            }
+            if (cur == '\n') {
+                line++;
+            }
+        }
+    }
+    
+    private char peekNextChar() {
+        if (pos < file.size()) {
+            return file.get(pos);
+        }
+        return '\u0000';
     }
 
     private void incrementPos() {
