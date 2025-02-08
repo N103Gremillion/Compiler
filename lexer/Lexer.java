@@ -93,59 +93,93 @@ public final class Lexer{
         return new Token(type, value);
     }
 
-    public String getNextValue(){
-        if (pos >= file.size()){
-            return "";
+    public String getNextValue() {
+        if (pos >= file.size()) {
+            return "";  
         }
+    
         StringBuilder value = new StringBuilder();
         boolean found = false;
         boolean inWord = false;
-        while (!found){
+    
+        while (!found) {
             char cur = getNextChar();
-            if (cur == '\n'){
-                line++;
+    
+            if (cur == '\n') {
+                line++;  // Track line number
             }
+    
             if (cur == '\u0000') {
-                return null;
+                return null;  // End of input
             }
-
-            // fishinsh string litteral
+    
+            // Handle string literals
             if (cur == '"') {
-                return getStringLiteral();
+                return getStringLiteral();  // Get the string literal
             }
-
-            // handle single line comments
+    
+            // Handle single-line comments
             if (cur == '/' && peekNextChar() == '/') {
                 skipSingleLineComment();
                 continue;
             }
-
-            // **Handle Multi-Line Comments (`/* ... */`)
-            if (cur == '/' && peekNextChar() == '*') { 
+    
+            // Handle multi-line comments
+            if (cur == '/' && peekNextChar() == '*') {
                 skipMultiLineComment();
                 continue;
             }
-
-            if (Character.isWhitespace(cur) && inWord) {
-                found = true;
+    
+            // Handle whitespace (end of word if inWord is true)
+            if (Character.isWhitespace(cur)) {
+                if (inWord) {
+                    found = true;
+                }
+                continue;  // Skip whitespace
             }
-            else if (isSeparator(cur) && inWord) {
-                found = true;
-                decrementPos();
-            }
-            else if (isSeparator(cur) && !inWord) {
+    
+            // Handle word characters (identifier or part of a number)
+            if (Character.isLetterOrDigit(cur) || cur == '_') {
                 value.append(cur);
-                found = true;
+                inWord = true;  // We're in a word now
+            } 
+            // Handle increment/decrement operators (e.g., ++ or --)
+            else if (inWord && (cur == '+' || cur == '-')) {
+                char next = peekNextChar();
+                if (next == cur) {  // Check if it's ++ or --
+                    getNextChar();  // Consume the second + or -
+                    found = true;   // We found the operator
+                    return value.toString();  // Return the identifier first
+                }
             }
-            else if (Character.isWhitespace(cur)) {
+            // Handle separators (like spaces or punctuation)
+            else if (isSeparator(cur)) {
+                if (inWord) {
+                    found = true; 
+                    decrementPos();  
+                } else {
+                    value.append(cur);  
+                    found = true;
+                }
             }
             else {
-                inWord = true;
-                value.append(cur);
+                // If you're in a word, handle the current character
+                if (inWord) {
+                    value.append(cur);
+                } else {
+                    inWord = true;  
+                    value.append(cur);
+                }
             }
         }
+    
+        // Return the remaining value, which is an identifier or operator
         return value.toString();
     }
+    
+    
+    
+    
 
     public char getNextChar() {
         if (pos >= file.size()){
@@ -300,6 +334,9 @@ public final class Lexer{
         types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("==")); 
+        types.add(Type.OPERATOR);
+
+        patterns.add(Pattern.compile("%=")); 
         types.add(Type.OPERATOR);
 
         patterns.add(Pattern.compile("!=")); 
